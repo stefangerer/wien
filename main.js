@@ -44,3 +44,5 @@ L.control.scale({
 }).addTo(map);
 
 L.control.fullscreen().addTo(map); 
+
+L.control.minimap().addTo(map); 
