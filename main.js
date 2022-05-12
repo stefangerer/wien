@@ -166,7 +166,16 @@ async function loadZones(url) {
     layerControl.addOverlay(overlay, "Fußgängerzonen");
     overlay.addTo(map);
 
-    L.geoJSON(geojson).bindPopup(function (layer) {
+    L.geoJSON(geojson, {
+        style: function(feature){
+            return {
+                color: "#F012BE",
+                weight: 1,
+                opacity: 0.1,
+                fillOpacity: 0.3
+            }
+        }
+    }).bindPopup(function (layer) {
         return `
             <h4>Fußgängerzone: ${layer.feature.properties.ADRESSE}</h4>
             Öffnungszeiten: ${layer.feature.properties.ZEITRAUM || "Keine Informationen"}
@@ -184,7 +193,7 @@ async function loadHotels(url) {
     let response = await fetch(url);
     let geojson = await response.json();
     console.log(geojson);
-    let overlay = L.featureGroup();
+    let overlay = L.markerClusterGroup();
     layerControl.addOverlay(overlay, "Hotels");
     overlay.addTo(map)
     L.geoJSON(geojson, {
