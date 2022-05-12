@@ -200,7 +200,9 @@ async function loadHotels(url) {
     overlay.addTo(map)
     L.geoJSON(geojson, {
         pointToLayer: function (geoJsonPoint, latlng) {
-            console.log(geoJsonPoint.properties.NAME);
+            let searchList = document.querySelector(`#searchList`); 
+            searchList.innerHTML += `<option value="${geoJsonPoint.properties.BETRIEB}"><\option>`;
+           
             let popup = `
                 
                 <strong>${geoJsonPoint.properties.BETRIEB}</strong>
