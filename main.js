@@ -168,10 +168,10 @@ async function loadZones(url) {
 
     L.geoJSON(geojson).bindPopup(function (layer) {
         return `
-            <h4>Fußgängerzone</h4>
-            Addresse: ${layer.feature.properties.ADRESSE}
+            <h4>Fußgängerzone: ${layer.feature.properties.ADRESSE}</h4>
+            Öffnungszeiten: ${layer.feature.properties.ZEITRAUM || "Keine Informationen"}
             <br>
-            Zeitraum: ${layer.feature.properties.ZEITRAUM}
+            Informationen: ${layer.feature.properties.AUSN_TEXT || "Keine Informationen"}
             <br>
         `;
         //return layer.feature.properties.LINE_NAME;
