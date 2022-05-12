@@ -2,20 +2,20 @@
 
 
 let stephansdom = {
-   lat: 48.208431766854055,
-   lng: 16.373449188835192,
-   titel: "Stephansdom",  
-}; 
+    lat: 48.208431766854055,
+    lng: 16.373449188835192,
+    titel: "Stephansdom",
+};
 
-let startLayer = L.tileLayer.provider("BasemapAT.grau"); 
+let startLayer = L.tileLayer.provider("BasemapAT.grau");
 
 let map = L.map("map", {
-    center: [stephansdom.lat, stephansdom.lng], 
-    zoom: 12, 
+    center: [stephansdom.lat, stephansdom.lng],
+    zoom: 12,
     layers: [
         startLayer
     ]
-}); 
+});
 
 let layerControl = L.control.layers({
     "BasemapAT Grau": startLayer,
@@ -40,19 +40,19 @@ let layerControl = L.control.layers({
 // let mrk = L.marker([stephansdom.lat, stephansdom.lng]).addTo(sightLayer)
 
 L.control.scale({
-    imperial: false, 
+    imperial: false,
 }).addTo(map);
 
-L.control.fullscreen().addTo(map); 
+L.control.fullscreen().addTo(map);
 
 var miniMap = new L.Control.MiniMap(
     L.tileLayer.provider("BasemapAT")
 
-).addTo(map); 
+).addTo(map);
 
 // Sehenswürdigkeiten
 async function loadSites(url) {
-    let response = await fetch(url);    
+    let response = await fetch(url);
     let geojson = await response.json();
     //console.log(geojson);
 
@@ -61,7 +61,7 @@ async function loadSites(url) {
     overlay.addTo(map);
 
     L.geoJSON(geojson, {
-        pointToLayer: function(geoJsonPoint, latlng) {
+        pointToLayer: function (geoJsonPoint, latlng) {
             //L.marker(latlng).addTo(map)
             //console.log(geoJsonPoint.properties.NAME);
             let popup = `
@@ -85,7 +85,7 @@ loadSites("https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&vers
 
 // Haltestellen Vienna Sightseeing
 async function loadStops(url) {
-    let response = await fetch(url);    
+    let response = await fetch(url);
     let geojson = await response.json();
     //console.log(geojson);
 
@@ -94,7 +94,7 @@ async function loadStops(url) {
     overlay.addTo(map);
 
     L.geoJSON(geojson, {
-        pointToLayer: function(geoJsonPoint, latlng) {
+        pointToLayer: function (geoJsonPoint, latlng) {
             //L.marker(latlng).addTo(map)
             //console.log(geoJsonPoint.properties);
             let popup = `
@@ -119,7 +119,7 @@ loadStops("https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&vers
 
 // Liniennetz Vienna Sightseeing
 async function loadLines(url) {
-    let response = await fetch(url);    
+    let response = await fetch(url);
     let geojson = await response.json();
     console.log(geojson);
 
@@ -127,13 +127,38 @@ async function loadLines(url) {
     layerControl.addOverlay(overlay, "Liniennetz Vienna Sightseeing");
     overlay.addTo(map);
 
-    L.geoJSON(geojson).addTo(overlay);
+    L.geoJSON(geojson, {
+        style: function(feature){
+            let colors = {
+                "Red Line": "#FF4136",
+                "Yellow Line": "#FFDC00", 
+                "Blue Line": "#0074D9", 
+                "Green Line": "#2ECC40", 
+                "Gray Line": "#AAAAAA", 
+                "Orange Line": "#FF851B"
+            };
+            
+            return {
+                color: `${colors[feature.properties.LINE_NAME]}`, 
+                weight: 4,
+                dashArray: [10, 6]
+            };
+        }
+    }).bindPopup(function (layer) {
+        return `
+            <h4>${layer.feature.properties.LINE_NAME}</h4>
+            von: ${layer.feature.properties.FROM_NAME}
+            <br>
+            nach: ${layer.feature.properties.TO_NAME}
+        `;
+        //return layer.feature.properties.LINE_NAME;
+    }).addTo(overlay)
 }
-//loadLines("https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien:TOURISTIKLINIEVSLOGD&srsName=EPSG:4326&outputFormat=json");
+loadLines("https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien:TOURISTIKLINIEVSLOGD&srsName=EPSG:4326&outputFormat=json");
 
 // Fußgängerzonen
 async function loadZones(url) {
-    let response = await fetch(url);    
+    let response = await fetch(url);
     let geojson = await response.json();
     console.log(geojson);
 
@@ -148,13 +173,13 @@ async function loadZones(url) {
 // Hotels und Unterkünfte
 async function loadHotels(url) {
     let response = await fetch(url);
-    let geojson = await response.json(); 
+    let geojson = await response.json();
     console.log(geojson);
     let overlay = L.featureGroup();
-    layerControl.addOverlay(overlay,"Hotels");
+    layerControl.addOverlay(overlay, "Hotels");
     overlay.addTo(map)
     L.geoJSON(geojson, {
-        pointToLayer: function(geoJsonPoint,latlng){
+        pointToLayer: function (geoJsonPoint, latlng) {
             console.log(geoJsonPoint.properties.NAME);
             let popup = `
                 
@@ -173,31 +198,30 @@ async function loadHotels(url) {
                 return L.marker(latlng, {
                     icon: L.icon({
                         iconUrl: "icons/hotel_0star.png",
-                        iconAnchor: [16,37],
-                        popupAnchor: [0,-37]
+                        iconAnchor: [16, 37],
+                        popupAnchor: [0, -37]
                     })
                 }).bindPopup(popup);
             } else if (geoJsonPoint.properties.BETRIEBSART == "P") {
                 return L.marker(latlng, {
-                    icon: L.icon({ 
+                    icon: L.icon({
                         iconUrl: "icons/lodging_0star.png",
-                        iconAnchor: [16,37],
-                        popupAnchor: [0,-37]
+                        iconAnchor: [16, 37],
+                        popupAnchor: [0, -37]
                     })
                 }).bindPopup(popup);
             } else {
                 return L.marker(latlng, {
                     icon: L.icon({
                         iconUrl: "icons/apartment-2.png",
-                        iconAnchor: [16,37],
-                        popupAnchor: [0,-37]
+                        iconAnchor: [16, 37],
+                        popupAnchor: [0, -37]
                     })
                 }).bindPopup(popup);
             }
-             
+
         }
 
     }).addTo(overlay);
 }
 loadHotels("https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien:UNTERKUNFTOGD&srsName=EPSG:4326&outputFormat=json");
-
