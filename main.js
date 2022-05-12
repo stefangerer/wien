@@ -128,18 +128,18 @@ async function loadLines(url) {
     overlay.addTo(map);
 
     L.geoJSON(geojson, {
-        style: function(feature){
+        style: function (feature) {
             let colors = {
                 "Red Line": "#FF4136",
-                "Yellow Line": "#FFDC00", 
-                "Blue Line": "#0074D9", 
-                "Green Line": "#2ECC40", 
-                "Gray Line": "#AAAAAA", 
+                "Yellow Line": "#FFDC00",
+                "Blue Line": "#0074D9",
+                "Green Line": "#2ECC40",
+                "Gray Line": "#AAAAAA",
                 "Orange Line": "#FF851B"
             };
-            
+
             return {
-                color: `${colors[feature.properties.LINE_NAME]}`, 
+                color: `${colors[feature.properties.LINE_NAME]}`,
                 weight: 4,
                 dashArray: [10, 6]
             };
@@ -167,7 +167,7 @@ async function loadZones(url) {
     overlay.addTo(map);
 
     L.geoJSON(geojson, {
-        style: function(feature){
+        style: function (feature) {
             return {
                 color: "#F012BE",
                 weight: 1,
@@ -198,11 +198,12 @@ async function loadHotels(url) {
     });
     layerControl.addOverlay(overlay, "Hotels");
     overlay.addTo(map)
-    L.geoJSON(geojson, {
+
+    let hotelsLayer = L.geoJSON(geojson, {
         pointToLayer: function (geoJsonPoint, latlng) {
-            let searchList = document.querySelector(`#searchList`); 
+            let searchList = document.querySelector(`#searchList`);
             searchList.innerHTML += `<option value="${geoJsonPoint.properties.BETRIEB}"><\option>`;
-           
+
             let popup = `
                 
                 <strong>${geoJsonPoint.properties.BETRIEB}</strong>
@@ -246,9 +247,15 @@ async function loadHotels(url) {
 
     }).addTo(overlay);
 
-    let form = document.querySelector("#searchForm"); 
-    form.suchen.onclick = function(){
-        console.log(form.hotel.value); 
+    let form = document.querySelector("#searchForm");
+    form.suchen.onclick = function () {
+        console.log(form.hotel.value);
+        hotelsLayer.eachLayer(function (marker) {
+            if (form.hotel.value == marker.feature.properties.BETRIEB) {
+                map.setView(marker.getLatLng(), 17);
+                marker.openPopup();
+            }
+        })
     }
 
 }
